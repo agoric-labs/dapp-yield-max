@@ -41,6 +41,7 @@ export const MakeAccount = () => {
           (update: { status: string; data?: unknown }) => {
             switch (update.status) {
               case 'error':
+                console.error('Error:', update);
                 reject(new Error(`Offer error: ${update.data}`));
                 break;
               case 'accepted':

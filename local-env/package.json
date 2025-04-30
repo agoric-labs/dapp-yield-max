@@ -6,7 +6,8 @@
   "scripts": {
     "build": "cd agoric-to-axelar-local && npm i && npm run build:core && npm run build:cosmos",
     "start": "cd agoric-to-axelar-local/packages/axelar-local-dev-cosmos && npm run start",
-    "relay": "node relay.js"
+    "relay": "node relay.js",
+    "postinstall": "git submodule update --init --recursive"
   },
   "devDependencies": {
     "@cosmjs/stargate": "^0.31.1",
