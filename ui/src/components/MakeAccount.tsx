@@ -41,7 +41,6 @@ export const MakeAccount = () => {
           (update: { status: string; data?: unknown }) => {
             switch (update.status) {
               case 'error':
-                console.error('Error:', update);
                 reject(new Error(`Offer error: ${update.data}`));
                 break;
               case 'accepted':
@@ -68,7 +67,7 @@ export const MakeAccount = () => {
     }
   };
 
-  const sendGmpViaLCA = async () => {
+  const handler = (action) => async () => {
     if (!latestInvitation) return;
 
     const requiredBrand = brands?.[BLD.brandKey];
@@ -81,14 +80,48 @@ export const MakeAccount = () => {
       },
     };
 
-    const factoryContractAddress = '0xef8651dD30cF990A1e831224f2E0996023163A81';
-    const contractInvocationData = [
-      {
-        functionSignature: 'createVendor(string)',
-        args: ['ownerAddress'],
-        target: factoryContractAddress,
-      },
-    ];
+    let targetContractAddress;
+    let contractInvocationData;
+    let type: Number;
+
+    if (action === 'supply') {
+      targetContractAddress = '0xd8E896691A0FCE4641D44d9E461A6d746A5c91dB';
+      contractInvocationData = [
+        {
+          functionSignature: 'approve(address,uint256)',
+          args: [
+            '0x666A92418cd154380c912e3fD56fa03Fe80eE342',
+            1000000000000000000000000000000000000000,
+          ],
+          target: '0x7cCc8E1CD3167e2bFe0a6c55d83Ed0537d3bb139',
+        },
+        {
+          functionSignature: 'supply(address,uint256,address,uint16)',
+          args: [
+            '0x7cCc8E1CD3167e2bFe0a6c55d83Ed0537d3bb139',
+            5,
+            '0xd8E896691A0FCE4641D44d9E461A6d746A5c91dB',
+            0,
+          ],
+          target: '0x666A92418cd154380c912e3fD56fa03Fe80eE342',
+        },
+      ];
+      type = 2;
+    } else if (action === 'withdraw') {
+      targetContractAddress = '0xd8E896691A0FCE4641D44d9E461A6d746A5c91dB';
+      contractInvocationData = [
+        {
+          functionSignature: 'withdraw(address,uint256,address)',
+          args: [
+            '0x7cCc8E1CD3167e2bFe0a6c55d83Ed0537d3bb139',
+            5,
+            '0xd8E896691A0FCE4641D44d9E461A6d746A5c91dB',
+          ],
+          target: '0x666A92418cd154380c912e3fD56fa03Fe80eE342',
+        },
+      ];
+      type = 1;
+    }
 
     const args = {
       id: Date.now(),
@@ -100,8 +133,8 @@ export const MakeAccount = () => {
           'sendGmp',
           [
             {
-              destinationAddress: factoryContractAddress,
-              type: 1,
+              destinationAddress: targetContractAddress,
+              type,
               gasAmount: 20000,
               destinationEVMChain: 'Ethereum',
               contractInvocationData,
@@ -167,10 +200,17 @@ export const MakeAccount = () => {
           </button>
           <button
             className="invoke-button"
-            onClick={sendGmpViaLCA}
+            onClick={handler("deposit")}
             disabled={!latestInvitation}
           >
-            Use Account {latestInvitation ? `(${latestInvitation[0]})` : ''}
+            Deposit Account {latestInvitation ? `(${latestInvitation[0]})` : ''}
+          </button>
+          <button
+            className="invoke-button"
+            onClick={handler("withdraw")}
+            disabled={!latestInvitation}
+          >
+            Withdraw Account {latestInvitation ? `(${latestInvitation[0]})` : ''}
           </button>
         </div>
       </div>

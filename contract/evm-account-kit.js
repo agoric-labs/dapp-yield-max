@@ -157,7 +157,9 @@ export const prepareEvmAccountKit = (
               JSON.stringify({ isContractCallResult, data }),
             );
 
-            if (this.state.evmAccountAddress) {
+            console.log('isContractCallResult', isContractCallResult, typeof(isContractCallResult));
+
+            if (isContractCallResult) {
               trace('Setting latestMessage:', data);
               this.state.latestMessage = harden([...data]);
             } else {
