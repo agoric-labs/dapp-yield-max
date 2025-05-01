@@ -200,17 +200,17 @@ export const MakeAccount = () => {
           </button>
           <button
             className="invoke-button"
-            onClick={handler("deposit")}
+            onClick={handler("supply")}
             disabled={!latestInvitation}
           >
-            Deposit Account {latestInvitation ? `(${latestInvitation[0]})` : ''}
+            Deposit To Aave {latestInvitation ? `(${latestInvitation[0]})` : ''}
           </button>
           <button
             className="invoke-button"
             onClick={handler("withdraw")}
             disabled={!latestInvitation}
           >
-            Withdraw Account {latestInvitation ? `(${latestInvitation[0]})` : ''}
+            Withdraw From Aave {latestInvitation ? `(${latestInvitation[0]})` : ''}
           </button>
         </div>
       </div>
