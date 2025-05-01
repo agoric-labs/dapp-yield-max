@@ -58,12 +58,11 @@ const runRelay = async () => {
 
   await aaveContract.setReserveData(
     tokenContract.address,
-    ethers.parseUnits("0.05", 27), // 5% liquidity rate
-    ethers.parseUnits("0.07", 27), // 7% variable borrow rate
-    ethers.parseUnits("0.06", 27), // 6% stable borrow rate
-    100 // 1% reward rate (in basis points)
+    ethers.parseUnits('0.05', 27), // 5% liquidity rate
+    ethers.parseUnits('0.07', 27), // 7% variable borrow rate
+    ethers.parseUnits('0.06', 27), // 6% stable borrow rate
+    10000000000, // 1% reward rate (in basis points)
   );
-
 
   evmRelayer.setRelayer(RelayerType.Agoric, axelarRelayer);
 
@@ -80,19 +79,49 @@ const runRelay = async () => {
       console.log('Error in relay:', e);
     }
 
-    const wallet = new ethers.Contract(
-      '0xd8E896691A0FCE4641D44d9E461A6d746A5c91dB',
-      Wallet.abi,
-    );
-    const usdcBalanceWallet = await tokenContract.balanceOf(
-      '0xd8E896691A0FCE4641D44d9E461A6d746A5c91dB',
-    );
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    const rpcProvider = ethereumNetwork.provider;
+    await rpcProvider.send('evm_mine', []);
+
     console.log('\n\n\n\n\n');
+    const wallet = '0xd8E896691A0FCE4641D44d9E461A6d746A5c91dB';
+    const usdcBalanceWallet = await tokenContract.balanceOf(
+      wallet,
+    );
     console.log('Wallet USDC Balance:', usdcBalanceWallet.toString());
+    const pendingRewards = await aaveContract.getPendingRewards(
+      wallet,
+      tokenContract.address,
+    );
+    console.log('Pending rewards:', pendingRewards.toString());
+
+    const aTokenBalance = await aaveContract.getAccruedInterest(
+      wallet,
+      tokenContract.address,
+    );
+    console.log('Accrued interest:', aTokenBalance.toString());
+
+//   console.log("\n---- Debug Reward Calculation ----");
+// const [
+//   depositAmount,
+//   depositTime,
+//   timeElapsed,
+//   rewardRate,
+//   ratePerSecond,
+//   rewards
+// ] = await aaveContract.debugRewardComponents(wallet, tokenContract.address);
+
+// console.log("depositAmount:", depositAmount);
+// console.log("depositTime (unix):", depositTime.toString());
+// console.log("timeElapsed (seconds):", timeElapsed.toString());
+// console.log("rewardRate (bps):", rewardRate.toString());
+// console.log("ratePerSecond (scaled):", ratePerSecond.toString());
+// console.log("rewards (raw wei):", rewards.toString());
+// console.log("rewards (formatted):", rewards);
 
 
-  const aTokenBalance = await aaveContract.getAccruedInterest('0xd8E896691A0FCE4641D44d9E461A6d746A5c91dB', tokenContract.address);
-  console.log("Accrued interest:", aTokenBalance.toString());
+
+    console.log('\n\n\n\n\n');
   }
 };
 
