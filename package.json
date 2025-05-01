@@ -5,7 +5,17 @@
   "scripts": {
     "start:ui": "cd ui && yarn dev",
     "lint": "prettier . --check",
-    "lint:fix": "prettier . --write"
+    "lint:fix": "prettier . --write",
+    "build:solidity": "cd solidity && yarn build",
+    "build:deploy": "cd deploy && yarn build",
+    "build:local-env": "cd local-env && yarn build",
+    "build": "concurrently \"yarn build:solidity\" \"yarn build:deploy\" \"yarn build:local-env\"",
+    "local-env:start": "cd local-env && yarn start",
+    "local-env:relay": "cd local-env && yarn relay",
+    "deploy:token": "cd deploy && yarn register:token",
+    "deploy:contract": "cd deploy && yarn deploy",
+    "deploy:contracts": "yarn deploy:token && yarn deploy:contract",
+    "deps": "cd contract && yarn install && cd ../deploy && yarn install && cd ../local-env && yarn install && cd ../ui && yarn install && cd ../solidity && yarn install"
   },
   "private": true,
   "useWorkspaces": true,
@@ -20,6 +30,7 @@
   "description": "",
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
   "devDependencies": {
+    "concurrently": "^9.1.2",
     "prettier": "^3.5.3"
   }
 }

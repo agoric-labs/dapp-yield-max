@@ -1,0 +1,3 @@
+[submodule "local-env/agoric-to-axelar-local"]
+	path = local-env/agoric-to-axelar-local
+	url = https://github.com/agoric-labs/agoric-to-axelar-local.git
