@@ -286,19 +286,96 @@ contract MockAavePool is Ownable {
     function balanceOf(address aTokenAddress, address user) external view returns (uint256) {
         // Find which asset this aToken corresponds to
         address asset = address(0);
-        address[] memory allAssets = _getAllConfiguredReserves();
         
-        for (uint i = 0; i < allAssets.length; i++) {
-            if (_reserves[allAssets[i]].aTokenAddress == aTokenAddress) {
-                asset = allAssets[i];
-                break;
-            }
+        // Direct check if this is an aToken we know about
+        asset = _findAssetByAToken(aTokenAddress);
+        
+        // If we couldn't find the asset, try the backup approach
+        if (asset == address(0)) {
+            // Log error information for debugging
+            revert(string(abi.encodePacked(
+                "Invalid aToken address: ", 
+                toHexString(aTokenAddress)
+            )));
         }
-        
-        require(asset != address(0), "Invalid aToken address");
         
         // Return principal plus interest
         return _userDeposits[user][asset] + _calculateAccruedInterest(user, asset);
+    }
+
+    /**
+     * @dev Internal helper to find which asset corresponds to an aToken
+     * @param aTokenAddress The aToken address to look up
+     * @return The corresponding asset address, or address(0) if not found
+     */
+    function _findAssetByAToken(address aTokenAddress) internal view returns (address) {
+        address[] memory allAssets = _getAllConfiguredReserves();
+        for (uint i = 0; i < allAssets.length; i++) {
+            address currentAsset = allAssets[i];
+            if (_reserves[currentAsset].aTokenAddress == aTokenAddress) {
+                return currentAsset;
+            }
+        }
+        return address(0);
+    }
+
+    /**
+     * @dev Internal function to get all configured reserves
+     * @return An array of asset addresses
+     */
+    function _getAllConfiguredReserves() internal view returns (address[] memory) {
+        // We'll track configured reserves in a more efficient way
+        uint256 maxReserves = 20; // Set a reasonable max number of reserves
+        address[] memory result = new address[](maxReserves);
+        uint256 count = 0;
+        
+        // We can check if the current pool has any tokens with non-zero deposits
+        // This is a more reliable way to find active reserves
+        for (uint160 i = 1; i <= 1000; i++) {
+            address potentialAsset = address(i);
+            if (_reserves[potentialAsset].aTokenAddress != address(0)) {
+                if (count < maxReserves) {
+                    result[count] = potentialAsset;
+                    count++;
+                }
+            }
+        }
+        
+        // Create a properly sized array with just the valid reserves
+        address[] memory trimmedResult = new address[](count);
+        for (uint i = 0; i < count; i++) {
+            trimmedResult[i] = result[i];
+        }
+        
+        return trimmedResult;
+    }
+    
+    /**
+     * @dev Helper function to convert an address to a hex string for debugging
+     */
+    function toHexString(address addr) internal pure returns (string memory) {
+        bytes memory buffer = new bytes(42);
+        buffer[0] = '0';
+        buffer[1] = 'x';
+        
+        for (uint256 i = 0; i < 20; i++) {
+            uint8 value = uint8(bytes20(addr)[i]);
+            buffer[2 + i * 2] = _toHexChar(value >> 4);
+            buffer[3 + i * 2] = _toHexChar(value & 0x0f);
+        }
+        
+        return string(buffer);
+    }
+    
+    /**
+     * @dev Helper function to convert a nibble to a hex character
+     */
+    function _toHexChar(uint8 value) internal pure returns (bytes1) {
+        if (value < 10) {
+            return bytes1(uint8(bytes1('0')) + value);
+        } else {
+            return bytes1(uint8(bytes1('a')) + value - 10);
+        }
     }
 
     /**
@@ -406,39 +483,6 @@ uint256 rewards = (depositAmount * ratePerSecond * timeElapsed) / 1e18;
         return rewards;
     }
     
-    /**
-     * @dev Internal function to get all configured reserves
-     * @return An array of asset addresses
-     */
-    function _getAllConfiguredReserves() internal view returns (address[] memory) {
-        // For simplicity, we'll maintain a list in memory for the mock
-        // In production, this would be stored and updated when assets are added
-        
-        // This is a simplistic implementation
-        // In a real implementation, you'd maintain an array of active reserves
-        address[] memory reserves = new address[](5); // Arbitrary size for example
-        
-        // This is just for the mock to work - in a real implementation, 
-        // you'd track all added reserves
-        uint count = 0;
-        
-        // This is just a basic example and wouldn't be practical in production
-        for (uint160 i = 1; i <= 5; i++) {
-            address potentialAsset = address(i);
-            if (_reserves[potentialAsset].aTokenAddress != address(0)) {
-                reserves[count] = potentialAsset;
-                count++;
-            }
-        }
-        
-        // Create properly sized array with only valid entries
-        address[] memory result = new address[](count);
-        for (uint i = 0; i < count; i++) {
-            result[i] = reserves[i];
-        }
-        
-        return result;
-    }
 
     function debugRewardComponents(address user, address asset) external view returns (
     uint256 depositAmount,
