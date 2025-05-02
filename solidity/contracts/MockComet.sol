@@ -39,13 +39,17 @@ contract MockComet {
                 block.timestamp,
                 block.prevrandao,
                 msg.sender
-             )));
+             )))% 100 + 1;
              
             baseTrackingSupplySpeed = random * 1e18; // Default to 1 COMP/sec
         }
         
     }
 
+    function getBaseTrackingSupplySpeed() external view returns (uint256) {
+        return baseTrackingSupplySpeed / 1e18; // Scale back to original
+    }
+    
     function supply(address asset, uint amount) external {
         accrueAccount(msg.sender);
         require(IERC20(asset).transferFrom(msg.sender, address(this), amount), "Transfer failed");
