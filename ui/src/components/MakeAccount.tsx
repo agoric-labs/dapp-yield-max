@@ -125,13 +125,67 @@ export const MakeAccount = () => {
       targetContractAddress = '0xd8E896691A0FCE4641D44d9E461A6d746A5c91dB';
       contractInvocationData = [
         {
-          functionSignature: 'withdraw(address,uint256,address)',
+          functionSignature: 'claimRewards(address,address)',
           args: [
             '0x7cCc8E1CD3167e2bFe0a6c55d83Ed0537d3bb139',
-            5,
             '0xd8E896691A0FCE4641D44d9E461A6d746A5c91dB',
           ],
           target: '0x666A92418cd154380c912e3fD56fa03Fe80eE342',
+        },
+      ];
+      type = 1;
+    } else if (action === 'supply-2') {
+      targetContractAddress = '0xd8E896691A0FCE4641D44d9E461A6d746A5c91dB';
+      contractInvocationData = [
+        {
+          functionSignature: 'approve(address,uint256)',
+          args: [
+            '0x8491D9AfC8cbDEebB9539729c05ce7924620329c',
+            1000000000000000000000000000000000000000,
+          ],
+          target: '0x7cCc8E1CD3167e2bFe0a6c55d83Ed0537d3bb139',
+        },
+        {
+          functionSignature: 'trackUser(address)',
+          args: [
+            '0xd8E896691A0FCE4641D44d9E461A6d746A5c91dB',
+          ],
+          target: '0x8491D9AfC8cbDEebB9539729c05ce7924620329c',
+        },  
+        {
+          functionSignature: 'supply(address,uint256)',
+          args: [
+            '0x7cCc8E1CD3167e2bFe0a6c55d83Ed0537d3bb139',
+            5,
+          ],
+          target: '0x8491D9AfC8cbDEebB9539729c05ce7924620329c',
+        },
+      ];
+      type = 2;
+    } else if (action === 'withdraw-2') {
+      targetContractAddress = '0xd8E896691A0FCE4641D44d9E461A6d746A5c91dB';
+      contractInvocationData = [
+        {
+          functionSignature: 'withdraw(address,uint256)',
+          args: [
+            '0x7cCc8E1CD3167e2bFe0a6c55d83Ed0537d3bb139',
+            5,
+          ],
+          target: '0x8491D9AfC8cbDEebB9539729c05ce7924620329c',
+        },
+      ];
+      type = 1;
+    } else if (action === 'rewards-2') {
+      targetContractAddress = '0xd8E896691A0FCE4641D44d9E461A6d746A5c91dB';
+      contractInvocationData = [
+        {
+          functionSignature: 'claim(address,address,bool)',
+          args: [
+            '0x8491D9AfC8cbDEebB9539729c05ce7924620329c',
+            '0xd8E896691A0FCE4641D44d9E461A6d746A5c91dB',
+            true,
+          ],
+          target: '0x07a9eE6a358F26b66daeBa9Dc4482fd554418C83',
         },
       ];
       type = 1;
@@ -210,29 +264,54 @@ export const MakeAccount = () => {
       <div className="dashboard">
         <div className="transfer-form">
           <button className="invoke-button" onClick={makeOffer}>
-            Make Account
+            Make Account {latestInvitation ? `(${latestInvitation[0]})` : ''}
           </button>
+          <br />
+          <br />
           <button
             className="invoke-button"
             onClick={handler("supply")}
             disabled={!latestInvitation}
           >
-            Deposit To Aave {latestInvitation ? `(${latestInvitation[0]})` : ''}
+            Deposit To Aave 
+          </button>
+          <button
+            className="invoke-button"
+            onClick={handler("rewards")}
+            disabled={!latestInvitation}
+          >
+            Get rewards From Aave 
           </button>
           <button
             className="invoke-button"
             onClick={handler("withdraw")}
             disabled={!latestInvitation}
           >
-            Withdraw From Aave {latestInvitation ? `(${latestInvitation[0]})` : ''}
+            Withdraw From Aave 
           </button>  
-          {/* <button
+          <br />
+          <br />
+          <button
             className="invoke-button"
-            onClick={handler("rewards")}
+            onClick={handler("supply-2")}
             disabled={!latestInvitation}
           >
-            Get rewards From Aave {latestInvitation ? `(${latestInvitation[0]})` : ''}
-          </button> */}
+            Supply to Compound 
+          </button>    
+          <button
+            className="invoke-button"
+            onClick={handler("rewards-2")}
+            disabled={!latestInvitation}
+          >
+            Get Rewards from Compound 
+          </button>    
+          <button
+            className="invoke-button"
+            onClick={handler("withdraw-2")}
+            disabled={!latestInvitation}
+          >
+            Withdraw from Compound 
+          </button>  
         </div>
       </div>
     </div>

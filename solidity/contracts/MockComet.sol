@@ -10,7 +10,7 @@ contract MockComet {
     address public baseAsset;
 
     // Collateral mapping: user -> token -> amount
-    mapping(address => mapping(address => uint128)) public collateral;
+    mapping(address => mapping(address => uint256)) public collateral;
 
     // Rewards tracking
     uint256 public baseTrackingSupplySpeed = 1e18; // 1 COMP/sec
@@ -35,7 +35,7 @@ contract MockComet {
     function setBaseTrackingSupplySpeed(uint256 newSpeed) external {
         baseTrackingSupplySpeed = newSpeed * 1e18; // Scale to 18 decimals
         if (newSpeed == 0) {
-            uint random = uint(keccak256(abi.encodePacked(
+            uint256 random = uint256(keccak256(abi.encodePacked(
                 block.timestamp,
                 block.prevrandao,
                 msg.sender
@@ -50,17 +50,17 @@ contract MockComet {
         return baseTrackingSupplySpeed / 1e18; // Scale back to original
     }
     
-    function supply(address asset, uint amount) external {
+    function supply(address asset, uint256 amount) external {
         accrueAccount(msg.sender);
         require(IERC20(asset).transferFrom(msg.sender, address(this), amount), "Transfer failed");
-        collateral[msg.sender][asset] += uint128(amount);
+        collateral[msg.sender][asset] += uint256(amount);
         emit Supply(msg.sender, msg.sender, amount);
     }
 
-    function withdraw(address asset, uint amount) external {
+    function withdraw(address asset, uint256 amount) external {
         accrueAccount(msg.sender);
         require(collateral[msg.sender][asset] >= amount, "Not enough collateral");
-        collateral[msg.sender][asset] -= uint128(amount);
+        collateral[msg.sender][asset] -= uint256(amount);
         require(IERC20(asset).transfer(msg.sender, amount), "Withdraw failed");
         emit Withdraw(msg.sender, msg.sender, amount);
     }
@@ -73,13 +73,13 @@ contract MockComet {
         return 0;
     }
 
-    function collateralBalanceOf(address account, address asset) external view returns (uint128) {
+    function collateralBalanceOf(address account, address asset) external view returns (uint256) {
         return collateral[account][asset];
     }
 
     event DebugSkip(string reason);
     
-    // Helper function to convert uint to string
+    // Helper function to convert uint256 to string
     function uint2str(uint256 _i) internal pure returns (string memory) {
         if (_i == 0) {
             return "0";
@@ -140,7 +140,7 @@ contract MockComet {
 
     // Helpers for test setup
     function totalSupply() public view returns (uint256 total) {
-        for (uint i = 0; i < dummyUsers.length; i++) {
+        for (uint256 i = 0; i < dummyUsers.length; i++) {
             total += collateral[dummyUsers[i]][baseAsset]* 1e12;
         }
     }

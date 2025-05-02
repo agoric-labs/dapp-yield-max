@@ -64,7 +64,7 @@ contract Wallet is AxelarExecutable, Ownable {
             abi.encode(AgoricResponse(true, _multicall(payload)))
         );
 
-        _send(sourceChain, sourceAddress, responsePayload);
+        // _send(sourceChain, sourceAddress, responsePayload);
     }
 
     function _executeWithToken(

@@ -56,6 +56,31 @@ const runRelay = async () => {
   );
   console.log('MockAave Contract Address:', aaveContract.address);
 
+  const compoundContract = await deployContract(
+    ethereumNetwork.userWallets[0],
+    require('../solidity/artifacts/contracts/MockComet.sol/MockComet.json'),
+    [tokenContract.address],
+  );
+  console.log('MockComet Contract Address:', compoundContract.address);
+
+  const compToken = await deployContract(
+    ethereumNetwork.userWallets[0],
+    require('../solidity/artifacts/contracts/MintableERC20.sol/MintableERC20.json'),
+    ['COMP', 'COMP'],
+  );
+  console.log('MockComet Contract Address:', compoundContract.address);
+
+  const compoundRewardsContract = await deployContract(
+    ethereumNetwork.userWallets[0],
+    require('../solidity/artifacts/contracts/MockCometRewards.sol/MockCometRewards.json'),
+    [compToken.address],
+  );
+  console.log(
+    'MockCometRewards Contract Address:',
+    compoundRewardsContract.address,
+  );
+
+  await ethereumNetwork.giveToken(aaveContract.address, 'aUSDC', 100000000);
   await aaveContract.setReserveData(
     tokenContract.address,
     ethers.parseUnits('0.05', 27), // 5% liquidity rate
@@ -79,15 +104,14 @@ const runRelay = async () => {
       console.log('Error in relay:', e);
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    // await new Promise((resolve) => setTimeout(resolve, 5000));
     const rpcProvider = ethereumNetwork.provider;
+    await rpcProvider.send('evm_increaseTime', [1000]);
     await rpcProvider.send('evm_mine', []);
 
     console.log('\n\n\n\n\n');
     const wallet = '0xd8E896691A0FCE4641D44d9E461A6d746A5c91dB';
-    const usdcBalanceWallet = await tokenContract.balanceOf(
-      wallet,
-    );
+    const usdcBalanceWallet = await tokenContract.balanceOf(wallet);
     console.log('Wallet USDC Balance:', usdcBalanceWallet.toString());
     const pendingRewards = await aaveContract.getPendingRewards(
       wallet,
@@ -95,31 +119,34 @@ const runRelay = async () => {
     );
     console.log('Pending rewards:', pendingRewards.toString());
 
-    const aTokenBalance = await aaveContract.getAccruedInterest(
-      wallet,
-      tokenContract.address,
-    );
-    console.log('Accrued interest:', aTokenBalance.toString());
+    const aTokenBalance = await tokenContract.balanceOf(aaveContract.address);
+    console.log('Aave Balance:', aTokenBalance.toString());
 
-//   console.log("\n---- Debug Reward Calculation ----");
-// const [
-//   depositAmount,
-//   depositTime,
-//   timeElapsed,
-//   rewardRate,
-//   ratePerSecond,
-//   rewards
-// ] = await aaveContract.debugRewardComponents(wallet, tokenContract.address);
+    //   console.log("\n---- Debug Reward Calculation ----");
+    const [
+      depositAmount,
+      depositTime,
+      timeElapsed,
+      rewardRate,
+      ratePerSecond,
+      rewards,
+    ] = await aaveContract.debugRewardComponents(wallet, tokenContract.address);
 
-// console.log("depositAmount:", depositAmount);
-// console.log("depositTime (unix):", depositTime.toString());
-// console.log("timeElapsed (seconds):", timeElapsed.toString());
-// console.log("rewardRate (bps):", rewardRate.toString());
-// console.log("ratePerSecond (scaled):", ratePerSecond.toString());
-// console.log("rewards (raw wei):", rewards.toString());
-// console.log("rewards (formatted):", rewards);
+    console.log('depositAmount:', depositAmount.toString());
+    console.log('depositTime (unix):', depositTime.toString());
+    console.log('timeElapsed (seconds):', timeElapsed.toString());
+    console.log('rewardRate (bps):', rewardRate.toString());
+    console.log('ratePerSecond (scaled):', ratePerSecond.toString());
+    
+    console.log('\n\nCompound:');
+    const compoundUSDC = await compoundContract.balanceOf(wallet);
+    console.log('Amount supplied to Compound:', compoundUSDC.toString());
+    await compoundContract.accrueAccount(wallet);
 
-
+    const rewardsWallet = await compToken.balanceOf(wallet);
+    console.log('Rewards in wallet:', rewardsWallet.toString());
+    const rewardsowed = await compoundRewardsContract.getRewardOwed(compoundContract.address, wallet);
+    console.log('Rewards owed by compound:', rewardsowed.toString());
 
     console.log('\n\n\n\n\n');
   }
