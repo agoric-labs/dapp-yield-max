@@ -124,11 +124,9 @@ function App() {
       ) : (
         <>
           <div className="main-container">
-            <Tabs />
             <div className="content">
               <WalletStatus address={wallet?.address} />
-              {(tab === 1 || tab === 2) && <AgoricContractForm />}
-              {tab === 3 && <MakeAccount />}
+               <MakeAccount />
             </div>
           </div>
         </>
