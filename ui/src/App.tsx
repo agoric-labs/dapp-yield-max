@@ -138,7 +138,7 @@ function App() {
                   <div className="amount-section">
                     <div className="amount-input-container">
                       <input type="number" className="amount-input" placeholder="0.00" />
-                      <button className="max-button">MAX</button>
+                      <a className="max-link">MAX</a>
                     </div>
                   </div>
                 </div>

@@ -1,5 +1,5 @@
 .container {
-  max-width: 1600px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -114,7 +114,8 @@
 
 .amount-input-container {
   display: flex;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.25rem;
   margin-bottom: 1rem;
   max-width: 300px;
 }
@@ -139,15 +140,18 @@
   -moz-appearance: none;
 }
 
-.amount-input:hover {
-  border-color: #ff0000;
-  box-shadow: 0 0 10px rgba(255, 0, 0, 0.08);
+.max-link {
+  font-size: 0.75rem;
+  color: #ff0000;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  text-align: right;
+  padding-right: 0.25rem;
 }
 
-.amount-input:focus {
-  outline: none;
-  border-color: #ff0000;
-  box-shadow: 0 0 15px rgba(255, 0, 0, 0.12);
+.max-link:hover {
+  color: #cc0000;
 }
 
 .max-button {
@@ -226,6 +230,10 @@
   border-radius: 12px;
   border: 1px solid rgba(0, 0, 0, 0.03);
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.02);
+  align-items: center;
+  text-align: center;
+  justify-content: space-between;
+  min-height: 100px;
 }
 
 .stat-label {
@@ -238,6 +246,7 @@
   font-size: 1.25rem;
   font-weight: 600;
   color: #1a1a1a;
+  margin-top: auto;
 }
 
 .connect-container {
