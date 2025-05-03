@@ -123,6 +123,22 @@ function App() {
             <div className="content-card">
               <h2 className="section-title">Yield Strategies</h2>
               
+              <div className="supply-widget">
+                <h4>Supply</h4>
+                <div className="supply-inputs">
+                  <select className="asset-select" defaultValue="AUSDC">
+                    {brands && Object.entries(brands).map(([key, brand]) => (
+                      <option key={key} value={key}>{key}</option>
+                    ))}
+                  </select>
+                  <div className="asset-balance">Available: 1,234.56 USDC</div>
+                  <div className="amount-input-container">
+                    <input type="number" className="amount-input" placeholder="Amount" />
+                    <button className="max-button">MAX</button>
+                  </div>
+                </div>
+              </div>
+
               <div className="current-strategy">
                 <h4>Current Strategy</h4>
                 <div className="current-strategy-grid">
@@ -133,18 +149,6 @@ function App() {
                   <div className="current-strategy-item">
                     <span className="current-strategy-label">Current Yield</span>
                     <span className="current-strategy-value">3.25% APY</span>
-                  </div>
-                </div>
-                <div className="current-strategy-inputs">
-                  <select className="asset-select" defaultValue="AUSDC">
-                    {brands && Object.entries(brands).map(([key, brand]) => (
-                      <option key={key} value={key}>{key}</option>
-                    ))}
-                  </select>
-                  <div className="asset-balance">Available: 1,234.56 USDC</div>
-                  <div className="amount-input-container">
-                    <input type="number" className="amount-input" placeholder="Amount" />
-                    <button className="max-button">MAX</button>
                   </div>
                 </div>
                 <div className="current-strategy-actions">
