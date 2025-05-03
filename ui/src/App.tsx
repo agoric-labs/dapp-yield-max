@@ -126,15 +126,20 @@ function App() {
               <div className="supply-widget">
                 <h4>Supply</h4>
                 <div className="supply-inputs">
-                  <select className="asset-select" defaultValue="AUSDC">
-                    {brands && Object.entries(brands).map(([key, brand]) => (
-                      <option key={key} value={key}>{key}</option>
-                    ))}
-                  </select>
-                  <div className="asset-balance">Available: 1,234.56 USDC</div>
-                  <div className="amount-input-container">
-                    <input type="number" className="amount-input" placeholder="Amount" />
-                    <button className="max-button">MAX</button>
+                  <div className="asset-section">
+                    <select className="asset-select" defaultValue="AUSDC">
+                      {brands && Object.entries(brands).map(([key, brand]) => (
+                        <option key={key} value={key}>{key}</option>
+                      ))}
+                    </select>
+                    <div className="asset-balance">Available: 1,234.56 USDC</div>
+                  </div>
+                  
+                  <div className="amount-section">
+                    <div className="amount-input-container">
+                      <input type="number" className="amount-input" placeholder="0.00" />
+                      <button className="max-button">MAX</button>
+                    </div>
                   </div>
                 </div>
               </div>
