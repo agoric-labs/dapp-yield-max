@@ -15,7 +15,6 @@ import Logo from './components/Logo';
 import gituhbLogo from '/github.svg';
 import WalletStatus from './components/WalletStatus';
 import { useAppStore } from './state';
-import { Tabs } from './components/Tabs';
 import { MakeAccount } from './components/MakeAccount';
 import { CurrentOffer } from './interfaces/interfaces';
 
@@ -70,16 +69,9 @@ const connectWallet = async () => {
 };
 
 function App() {
-  const { wallet, loading, tab } = useAppStore((state) => ({
+  const { wallet, loading } = useAppStore((state) => ({
     wallet: state.wallet,
-    balance: state.balance,
-    destinationEVMChain: state.destinationEVMChain,
-    evmAddress: state.evmAddress,
-    amountToSend: state.amountToSend,
     loading: state.loading,
-    error: state.error,
-    tab: state.tab,
-    currentOffers: state.currentOffers,
   }));
 
   useEffect(() => {
@@ -96,7 +88,6 @@ function App() {
       </div>
 
       <ToastContainer
-        aria-label
         position="bottom-right"
         hideProgressBar={false}
         newestOnTop={false}
@@ -107,12 +98,12 @@ function App() {
         pauseOnFocusLoss
         pauseOnHover
         theme="colored"
-      ></ToastContainer>
+      />
 
       <Logo />
 
       {!wallet ? (
-        <>
+        <div className="connect-container">
           <button
             className="connect-button"
             onClick={connectWallet}
@@ -120,16 +111,73 @@ function App() {
           >
             {loading ? 'Connecting...' : 'Connect Wallet'}
           </button>
-        </>
+        </div>
       ) : (
-        <>
-          <div className="main-container">
-            <div className="content">
-              <WalletStatus address={wallet?.address} />
-               <MakeAccount />
+        <div className="main-container">
+          <div className="wallet-section">
+            <WalletStatus address={wallet?.address} />
+          </div>
+          
+          <div className="content-grid">
+            <div className="content-card">
+              <h2 className="section-title">Yield Strategies</h2>
+              
+              <div className="current-strategy">
+                <h4>Current Strategy</h4>
+                <div className="current-strategy-grid">
+                  <div className="current-strategy-item">
+                    <span className="current-strategy-label">Protocol</span>
+                    <span className="current-strategy-value">Aave</span>
+                  </div>
+                  <div className="current-strategy-item">
+                    <span className="current-strategy-label">Current Yield</span>
+                    <span className="current-strategy-value">3.25% APY</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="strategy-grid">
+                <div className="strategy-card">
+                  <h3>Aave</h3>
+                  <div className="strategy-actions">
+                    <button className="strategy-button">Supply</button>
+                    <button className="strategy-button">Withdraw</button>
+                    <button className="strategy-button">Claim Rewards</button>
+                  </div>
+                </div>
+                
+                <div className="strategy-card">
+                  <h3>Compound</h3>
+                  <div className="strategy-actions">
+                    <button className="strategy-button">Supply</button>
+                    <button className="strategy-button">Withdraw</button>
+                    <button className="strategy-button">Claim Rewards</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="content-card">
+              <h2 className="section-title">Portfolio</h2>
+              <div className="portfolio-stats">
+                <div className="stat-item">
+                  <span className="stat-label">Total Value Locked</span>
+                  <span className="stat-value">$0.00</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">APY</span>
+                  <span className="stat-value">0.00%</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Total Rewards</span>
+                  <span className="stat-value">$0.00</span>
+                </div>
+              </div>
             </div>
           </div>
-        </>
+
+          <MakeAccount />
+        </div>
       )}
     </div>
   );
