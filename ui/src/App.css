@@ -76,14 +76,92 @@
   color: #1a1a1a;
 }
 
-.strategy-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+.asset-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  background-color: #ffffff;
+  color: #1a1a1a;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
 }
 
-.strategy-button {
-  width: 100%;
+.asset-select:hover {
+  border-color: #ff0000;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.08);
+}
+
+.asset-select:focus {
+  outline: none;
+  border-color: #ff0000;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.12);
+}
+
+.amount-input-container {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.amount-input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  background-color: #ffffff;
+  color: #1a1a1a;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
+}
+
+.amount-input:hover {
+  border-color: #ff0000;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.08);
+}
+
+.amount-input:focus {
+  outline: none;
+  border-color: #ff0000;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.12);
+}
+
+.max-button {
+  padding: 0.75rem 1rem;
+  background: #ff0000;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.max-button:hover {
+  background: #ff3333;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.max-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.current-strategy-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.current-strategy-button {
+  flex: 1;
   padding: 0.75rem;
   background: #ff0000;
   color: #ffffff;
@@ -96,13 +174,13 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
-.strategy-button:hover {
+.current-strategy-button:hover {
   background: #ff3333;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
 }
 
-.strategy-button:active {
+.current-strategy-button:active {
   transform: translateY(0);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
@@ -301,4 +379,12 @@
   font-size: 1.125rem;
   font-weight: 600;
   color: #1a1a1a;
+}
+
+.asset-balance {
+  font-size: 0.75rem;
+  color: #4a4a4a;
+  opacity: 0.8;
+  margin-bottom: 1rem;
+  text-align: right;
 }

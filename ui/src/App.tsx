@@ -69,9 +69,10 @@ const connectWallet = async () => {
 };
 
 function App() {
-  const { wallet, loading } = useAppStore((state) => ({
+  const { wallet, loading, brands } = useAppStore((state) => ({
     wallet: state.wallet,
     loading: state.loading,
+    brands: state.brands,
   }));
 
   useEffect(() => {
@@ -134,24 +135,38 @@ function App() {
                     <span className="current-strategy-value">3.25% APY</span>
                   </div>
                 </div>
+                <div className="current-strategy-actions">
+                  <button className="current-strategy-button">Withdraw</button>
+                  <button className="current-strategy-button">Claim Rewards</button>
+                </div>
               </div>
 
               <div className="strategy-grid">
                 <div className="strategy-card">
                   <h3>Aave</h3>
-                  <div className="strategy-actions">
-                    <button className="strategy-button">Supply</button>
-                    <button className="strategy-button">Withdraw</button>
-                    <button className="strategy-button">Claim Rewards</button>
+                  <select className="asset-select" defaultValue="AUSDC">
+                    {brands && Object.entries(brands).map(([key, brand]) => (
+                      <option key={key} value={key}>{key}</option>
+                    ))}
+                  </select>
+                  <div className="asset-balance">Available: 1,234.56 USDC</div>
+                  <div className="amount-input-container">
+                    <input type="number" className="amount-input" placeholder="Amount" />
+                    <button className="max-button">MAX</button>
                   </div>
                 </div>
                 
                 <div className="strategy-card">
                   <h3>Compound</h3>
-                  <div className="strategy-actions">
-                    <button className="strategy-button">Supply</button>
-                    <button className="strategy-button">Withdraw</button>
-                    <button className="strategy-button">Claim Rewards</button>
+                  <select className="asset-select" defaultValue="AUSDC">
+                    {brands && Object.entries(brands).map(([key, brand]) => (
+                      <option key={key} value={key}>{key}</option>
+                    ))}
+                  </select>
+                  <div className="asset-balance">Available: 1,234.56 USDC</div>
+                  <div className="amount-input-container">
+                    <input type="number" className="amount-input" placeholder="Amount" />
+                    <button className="max-button">MAX</button>
                   </div>
                 </div>
               </div>
