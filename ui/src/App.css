@@ -124,10 +124,10 @@ body {
 }
 
 .supply-widget {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
   background: var(--bg);
   border: var(--pixel-size) solid var(--border);
-  padding: var(--spacing);
-  margin-bottom: var(--spacing);
   position: relative;
 }
 
@@ -163,7 +163,7 @@ body {
 .supply-inputs {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--spacing);
+  gap: 1.5rem;
   max-width: 800px;
 }
 
@@ -201,6 +201,7 @@ body {
   text-align: right;
   padding-right: 0.25rem;
   letter-spacing: 0.5px;
+  opacity: 0.8;
 }
 
 .amount-input-container {
@@ -211,7 +212,7 @@ body {
 
 .max-link {
   font-size: 14px;
-  color: var(--highlight);
+  color: var(--text);
   text-decoration: none;
   cursor: pointer;
   text-align: right;
@@ -220,7 +221,7 @@ body {
 }
 
 .max-link:hover {
-  text-shadow: 0 0 8px var(--highlight);
+  text-shadow: 0 0 8px var(--text);
 }
 
 .strategy-grid {
@@ -480,10 +481,10 @@ body {
 }
 
 .current-strategy {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
   background: var(--bg);
   border: var(--pixel-size) solid var(--border);
-  padding: var(--spacing);
-  margin-bottom: var(--spacing);
   position: relative;
 }
 
@@ -519,8 +520,8 @@ body {
 .current-strategy-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--spacing);
-  margin-bottom: var(--spacing);
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .current-strategy-item {
@@ -533,12 +534,14 @@ body {
   font-size: 14px;
   color: var(--text-dim);
   letter-spacing: 0.5px;
+  opacity: 0.8;
 }
 
 .current-strategy-value {
   font-size: 16px;
-  color: var(--highlight);
+  color: var(--text);
   letter-spacing: 0.5px;
+  font-weight: 500;
 }
 
 .current-strategy-actions {
@@ -558,7 +561,7 @@ body {
 .supply-widget {
   margin: 1.5rem 0;
   padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.8);
+  background: black;
   border-radius: 12px;
   border: 1px solid rgba(0, 0, 0, 0.03);
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.02),
