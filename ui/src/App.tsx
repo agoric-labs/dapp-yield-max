@@ -135,6 +135,18 @@ function App() {
                     <span className="current-strategy-value">3.25% APY</span>
                   </div>
                 </div>
+                <div className="current-strategy-inputs">
+                  <select className="asset-select" defaultValue="AUSDC">
+                    {brands && Object.entries(brands).map(([key, brand]) => (
+                      <option key={key} value={key}>{key}</option>
+                    ))}
+                  </select>
+                  <div className="asset-balance">Available: 1,234.56 USDC</div>
+                  <div className="amount-input-container">
+                    <input type="number" className="amount-input" placeholder="Amount" />
+                    <button className="max-button">MAX</button>
+                  </div>
+                </div>
                 <div className="current-strategy-actions">
                   <button className="current-strategy-button">Withdraw</button>
                   <button className="current-strategy-button">Claim Rewards</button>
@@ -144,30 +156,12 @@ function App() {
               <div className="strategy-grid">
                 <div className="strategy-card">
                   <h3>Aave</h3>
-                  <select className="asset-select" defaultValue="AUSDC">
-                    {brands && Object.entries(brands).map(([key, brand]) => (
-                      <option key={key} value={key}>{key}</option>
-                    ))}
-                  </select>
-                  <div className="asset-balance">Available: 1,234.56 USDC</div>
-                  <div className="amount-input-container">
-                    <input type="number" className="amount-input" placeholder="Amount" />
-                    <button className="max-button">MAX</button>
-                  </div>
+                  <div className="max-yield">MAX YIELD: 3.25%</div>
                 </div>
                 
                 <div className="strategy-card">
                   <h3>Compound</h3>
-                  <select className="asset-select" defaultValue="AUSDC">
-                    {brands && Object.entries(brands).map(([key, brand]) => (
-                      <option key={key} value={key}>{key}</option>
-                    ))}
-                  </select>
-                  <div className="asset-balance">Available: 1,234.56 USDC</div>
-                  <div className="amount-input-container">
-                    <input type="number" className="amount-input" placeholder="Amount" />
-                    <button className="max-button">MAX</button>
-                  </div>
+                  <div className="max-yield">MAX YIELD: 2.83%</div>
                 </div>
               </div>
             </div>
