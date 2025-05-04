@@ -203,7 +203,7 @@ export const MakeAccount = () => {
             {
               destinationAddress: targetContractAddress,
               type,
-              gasAmount: 20000,
+              gasAmount: 20,
               destinationEVMChain: 'Ethereum',
               contractInvocationData,
             },

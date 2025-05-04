@@ -13,6 +13,7 @@ import { prepareEvmAccountKit } from './evm-account-kit.js';
  * @import {OrchestrationPowers, OrchestrationTools} from '@agoric/orchestration/src/utils/start-helper.js';
  * @import {CosmosChainInfo, Denom, DenomDetail} from '@agoric/orchestration';
  * @import {Marshaller, StorageNode} from '@agoric/internal/src/lib-chainStorage.js';
+ * @import {TimerService} from '@agoric/time';
  */
 
 /**
@@ -24,6 +25,7 @@ import { prepareEvmAccountKit } from './evm-account-kit.js';
  *   chainInfo: Record<string, CosmosChainInfo>;
  *   assetInfo?: [Denom, DenomDetail & { brandKey?: string }][];
  *   storageNode: Remote<StorageNode>;
+ *   timerService: TimerService;
  * }} privateArgs
  * @param {Zone} zone
  * @param {OrchestrationTools} tools
@@ -62,7 +64,9 @@ export const contract = async (
     vowTools,
     log,
     zoeTools,
+    timerService: privateArgs.timerService,
   });
+  console.log('fraz4');
 
   const { createAndMonitorLCA } = orchestrateAll(evmFlows, {
     makeEvmAccountKit,

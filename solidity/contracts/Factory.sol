@@ -16,7 +16,7 @@ struct CallResult {
 
 struct AgoricResponse {
     // false if this is a smart wallet creation, true if it's a contract call
-    bool isContractCallResult;
+    string message;
     CallResult[] data;
 }
 
@@ -37,10 +37,8 @@ contract Wallet is AxelarExecutable, Ownable {
     }
 
     function _multicall(
-        bytes calldata payload
+        CallParams[] memory calls
     ) internal returns (CallResult[] memory) {
-        CallParams[] memory calls = abi.decode(payload, (CallParams[]));
-
         CallResult[] memory results = new CallResult[](calls.length);
 
         for (uint256 i = 0; i < calls.length; i++) {
@@ -59,12 +57,16 @@ contract Wallet is AxelarExecutable, Ownable {
         string calldata sourceAddress,
         bytes calldata payload
     ) internal override onlyOwner(sourceAddress) {
+        (string memory message, CallParams[] memory innerPayload) = abi.decode(
+            payload,
+            (string, CallParams[])
+        );
         bytes memory responsePayload = abi.encodePacked(
             bytes4(0x00000000),
-            abi.encode(AgoricResponse(true, _multicall(payload)))
+            abi.encode(AgoricResponse(message, _multicall(innerPayload)))
         );
 
-        // _send(sourceChain, sourceAddress, responsePayload);
+        _send(sourceChain, sourceAddress, responsePayload);
     }
 
     function _executeWithToken(
@@ -74,7 +76,11 @@ contract Wallet is AxelarExecutable, Ownable {
         string calldata /*tokenSymbol*/,
         uint256 /*amount*/
     ) internal override {
-        _multicall(payload);
+        (string memory message, CallParams[] memory calls) = abi.decode(
+            payload,
+            (string, CallParams[])
+        );
+        _multicall(calls);
     }
 
     function _send(
@@ -134,7 +140,7 @@ contract Factory is AxelarExecutable {
 
         bytes memory msgPayload = abi.encodePacked(
             bytes4(0x00000000),
-            abi.encode(AgoricResponse(false, results))
+            abi.encode(AgoricResponse('ADDRESS', results))
         );
         _send(sourceChain, sourceAddress, msgPayload);
     }

@@ -10,6 +10,7 @@ import { decodeAbiParameters } from 'viem';
 import { Fail } from '@endo/errors';
 import { ChainAddressShape } from '@agoric/orchestration';
 import { gmpAddresses, buildGMPPayload } from './utils/gmp.js';
+import { E, Far } from '@endo/far';
 
 const trace = makeTracer('EvmTap');
 const { entries } = Object;
@@ -29,6 +30,7 @@ const { entries } = Object;
  * @import {ChainAddress, Denom, OrchestrationAccount} from '@agoric/orchestration';
  * @import {FungibleTokenPacketData} from '@agoric/cosmic-proto/ibc/applications/transfer/v2/packet.js';
  * @import {ZoeTools} from '@agoric/orchestration/src/utils/zoe-tools.js';
+ * @import {TimerService} from '@agoric/time';
  */
 
 /**
@@ -48,9 +50,77 @@ const EVMI = M.interface('holder', {
   getAddress: M.call().returns(M.any()),
   getLatestMessage: M.call().returns(M.any()),
   send: M.call(M.any(), M.any()).returns(M.any()),
-  sendGmp: M.call(M.any(), M.any()).returns(M.any()),
+  sendGmp: M.call(M.any()).returns(M.any()),
   fundLCA: M.call(M.any(), M.any()).returns(VowShape),
+  startAdjuster: M.call(M.any()).returns(),
 });
+
+const getCommandsForSwitch = (wallet, { aave, compound }) => {
+  const amount = 5;
+  const USDC_TOKEN = '0x7cCc8E1CD3167e2bFe0a6c55d83Ed0537d3bb139';
+  const COMPUND_CONTRACT = '0x8491D9AfC8cbDEebB9539729c05ce7924620329c';
+  const WALLET = wallet;
+  const AAVE_CONTRACT = '0x666A92418cd154380c912e3fD56fa03Fe80eE342';
+
+  const APPROVE_COMPOUND = {
+    functionSignature: 'approve(address,uint256)',
+    args: [COMPUND_CONTRACT, 1000000000000000000],
+    target: USDC_TOKEN,
+  };
+
+  const TRACK_USER_COMPOUND = {
+    functionSignature: 'trackUser(address)',
+    args: [WALLET],
+    target: COMPUND_CONTRACT,
+  };
+
+  const SUPPLY_COMPOUND = {
+    functionSignature: 'supply(address,uint256)',
+    args: [USDC_TOKEN, amount],
+    target: COMPUND_CONTRACT,
+  };
+
+  const WITHDRAW_COMPOUND = {
+    functionSignature: 'withdraw(address,uint256)',
+    args: [USDC_TOKEN, amount],
+    target: COMPUND_CONTRACT,
+  };
+
+  const APPROVE_AAVE = {
+    functionSignature: 'approve(address,uint256)',
+    args: [AAVE_CONTRACT, 1000000000000000000],
+    target: USDC_TOKEN,
+  };
+
+  const SUPPLY_AAVE = {
+    functionSignature: 'supply(address,uint256,address,uint16)',
+    args: [USDC_TOKEN, amount, WALLET, 0],
+    target: AAVE_CONTRACT,
+  };
+
+  const WITHDRAW_AAVE = {
+    functionSignature: 'withdraw(address,uint256,address)',
+    args: [USDC_TOKEN, amount, WALLET],
+    target: AAVE_CONTRACT,
+  };
+
+  const sendToAave = [APPROVE_AAVE, SUPPLY_AAVE];
+  const sendToCompund = [
+    APPROVE_COMPOUND,
+    TRACK_USER_COMPOUND,
+    SUPPLY_COMPOUND,
+  ];
+  const withdrawFromAave = [WITHDRAW_AAVE];
+  const withdrawFromCompound = [WITHDRAW_COMPOUND];
+
+  if (aave > compound) {
+    return [...withdrawFromCompound, ...sendToAave];
+  } else if (compound > aave) {
+    return [...withdrawFromAave, ...sendToCompund];
+  } else {
+    return [];
+  }
+};
 
 const InvitationMakerI = M.interface('invitationMaker', {
   makeEVMTransactionInvitation: M.call(M.string(), M.array()).returns(M.any()),
@@ -74,11 +144,12 @@ harden(EvmKitStateShape);
  *   vowTools: VowTools;
  *   log: (msg: string) => Vow<void>;
  *   zoeTools: ZoeTools;
+ *   timerService: TimerService;
  * }} powers
  */
 export const prepareEvmAccountKit = (
   zone,
-  { zcf, vowTools, log, zoeTools },
+  { zcf, vowTools, log, zoeTools, timerService },
 ) => {
   return zone.exoClassKit(
     'EvmTapKit',
@@ -132,12 +203,12 @@ export const prepareEvmAccountKit = (
 
           if (memo.source_chain === 'Ethereum') {
             const payloadBytes = decodeBase64(memo.payload);
-            const [{ isContractCallResult, data }] = decodeAbiParameters(
+            const [{ message, data }] = decodeAbiParameters(
               [
                 {
                   type: 'tuple',
                   components: [
-                    { name: 'isContractCallResult', type: 'bool' },
+                    { name: 'message', type: 'string' },
                     {
                       name: 'data',
                       type: 'tuple[]',
@@ -152,17 +223,39 @@ export const prepareEvmAccountKit = (
               payloadBytes,
             );
 
-            trace(
-              'receiveUpcall Decoded:',
-              JSON.stringify({ isContractCallResult, data }),
-            );
+            trace('receiveUpcall Decoded:', JSON.stringify({ message, data }));
 
-            console.log('isContractCallResult', isContractCallResult, typeof(isContractCallResult));
+            if (message === 'APY') {
+              const rates = data.map(
+                (message) =>
+                  decodeAbiParameters([{ type: 'uint256' }], message.result)[0],
+              );
 
-            if (isContractCallResult) {
-              trace('Setting latestMessage:', data);
-              this.state.latestMessage = harden([...data]);
-            } else {
+              const [apyRate1, apyRate2] = rates;
+           
+              console.log('\n\n\n\n');
+              if (apyRate1 > apyRate2 * BigInt(10 ** 18)) {
+                console.log(">>> AAVE has higher APY. transferring...");
+              } else {
+                console.log(">>> COMPOUND has higher APY. transferring....");
+              }
+              console.log('\n\n\n\n');
+
+              const c = {
+                destinationAddress: this.state.evmAccountAddress || '',
+                type: 1,
+                destinationEVMChain: 'Ethereum',
+                gasAmount: 1,
+                contractInvocationData: getCommandsForSwitch(this.state.evmAccountAddress, {
+                  aave: apyRate1,
+                  compound: apyRate2 * BigInt(10 ** 18),
+                }),
+                message: 'APY',
+                amount: BigInt(1),
+              };
+              this.facets.holder.sendGmp(c);
+              trace('APY rate is: ', apyRate1, apyRate2);
+            } else if (message === 'ADDRESS') {
               const [message] = data;
               const { success, result } = message;
 
@@ -176,6 +269,9 @@ export const prepareEvmAccountKit = (
                 this.state.evmAccountAddress = address;
                 trace('evmAccountAddress:', this.state.evmAccountAddress);
               }
+            } else {
+              trace('Setting latestMessage:', data);
+              this.state.latestMessage = harden([...data]);
             }
           }
 
@@ -217,16 +313,17 @@ export const prepareEvmAccountKit = (
         },
 
         /**
-         * @param {ZCFSeat} seat
          * @param {{
          *   destinationAddress: string;
          *   type: number;
          *   destinationEVMChain: string;
          *   gasAmount: number;
          *   contractInvocationData: Array<ContractCall>;
+         *   message?: string;
+         *   amount: bigint;
          * }} offerArgs
          */
-        async sendGmp(seat, offerArgs) {
+        async sendGmp(offerArgs) {
           void log('Inside sendGmp');
           const {
             destinationAddress,
@@ -234,9 +331,12 @@ export const prepareEvmAccountKit = (
             destinationEVMChain,
             gasAmount,
             contractInvocationData,
+            message = '',
           } = offerArgs;
 
-          trace('Offer Args:', JSON.stringify(offerArgs));
+            trace('Offer Args:', JSON.stringify(offerArgs, (key, value) =>
+            typeof value === 'bigint' ? value.toString() : value,
+            ));
 
           destinationAddress != null ||
             Fail`Destination address must be defined`;
@@ -253,27 +353,19 @@ export const prepareEvmAccountKit = (
               Fail`contractInvocationData array is empty`;
           }
 
-          const { give } = seat.getProposal();
 
-          const [[_kw, amt]] = entries(give);
-          amt.value > 0n || Fail`IBC transfer amount must be greater than zero`;
-          trace('_kw, amt', _kw, amt);
           trace(`targets: [${destinationAddress}]`);
           trace(
             `contractInvocationData: ${JSON.stringify(contractInvocationData)}`,
           );
 
           const payload =
-            type === 3 ? null : buildGMPPayload(contractInvocationData);
+            type === 3
+              ? null
+              : buildGMPPayload(contractInvocationData, message);
 
           void log(`Payload: ${JSON.stringify(payload)}`);
 
-          const { denom } = NonNullish(
-            this.state.assets.find((a) => a.brand === amt.brand),
-            `${amt.brand} not registered in vbank`,
-          );
-
-          trace('amt and brand', amt.brand);
 
           const { chainId } = this.state.remoteChainInfo;
 
@@ -294,7 +386,6 @@ export const prepareEvmAccountKit = (
           }
 
           void log(`Initiating IBC Transfer...`);
-          void log(`DENOM of token:${denom}`);
 
           trace('Initiating IBC Transfer...');
           await this.state.localAccount.transfer(
@@ -304,13 +395,12 @@ export const prepareEvmAccountKit = (
               chainId,
             },
             {
-              denom,
-              value: amt.value,
+              denom: 'ubld',
+              value: BigInt(offerArgs.amount),
             },
             { memo: JSON.stringify(memo) },
           );
 
-          seat.exit();
           void log('sendGmp successful');
           return 'sendGmp successful';
         },
@@ -322,6 +412,42 @@ export const prepareEvmAccountKit = (
           seat.hasExited() && Fail`The seat cannot be exited.`;
           return zoeTools.localTransfer(seat, this.state.localAccount, give);
         },
+        startAdjuster(seat) {
+          const { holder } = this.facets;
+          const address = this.state.evmAccountAddress;
+          if (!address) {
+            throw new Error('evmAccountAddress is not set');
+          }
+          void E(timerService).repeatAfter(
+            60n,
+            300n,
+            Far('PriceStepWaker', {
+              wake(time) {
+                const c = {
+                  destinationAddress: address,
+                  type: 1,
+                  destinationEVMChain: 'Ethereum',
+                  gasAmount: 1,
+                  contractInvocationData: [
+                    {
+                      target: '0x666A92418cd154380c912e3fD56fa03Fe80eE342',
+                      functionSignature: 'getReserveLiquidityRate(address)',
+                      args: ['0x7cCc8E1CD3167e2bFe0a6c55d83Ed0537d3bb139'],
+                    },
+                    {
+                      target: '0x8491D9AfC8cbDEebB9539729c05ce7924620329c',
+                      functionSignature: 'getBaseTrackingSupplySpeed()',
+                      args: [],
+                    },
+                  ],
+                  message: 'APY',
+                  amount: BigInt(1),
+                };
+                return holder.sendGmp(c);
+              },
+            }),
+          );
+        },
       },
       invitationMakers: {
         // "method" and "args" can be used to invoke methods of localAccount obj
@@ -332,7 +458,8 @@ export const prepareEvmAccountKit = (
               case 'sendGmp': {
                 const { give } = seat.getProposal();
                 await vowTools.when(holder.fundLCA(seat, give));
-                return holder.sendGmp(seat, args[0]);
+                holder.startAdjuster(seat);
+                return holder.sendGmp({...args[0], amount: BigInt(10000)});
               }
               case 'getLocalAddress': {
                 const vow = holder.getLocalAddress();
