@@ -147,17 +147,12 @@ export const MakeAccount = () => {
         },
         {
           functionSignature: 'trackUser(address)',
-          args: [
-            '0xd8E896691A0FCE4641D44d9E461A6d746A5c91dB',
-          ],
+          args: ['0xd8E896691A0FCE4641D44d9E461A6d746A5c91dB'],
           target: '0x8491D9AfC8cbDEebB9539729c05ce7924620329c',
-        },  
+        },
         {
           functionSignature: 'supply(address,uint256)',
-          args: [
-            '0x7cCc8E1CD3167e2bFe0a6c55d83Ed0537d3bb139',
-            5,
-          ],
+          args: ['0x7cCc8E1CD3167e2bFe0a6c55d83Ed0537d3bb139', 5],
           target: '0x8491D9AfC8cbDEebB9539729c05ce7924620329c',
         },
       ];
@@ -167,10 +162,7 @@ export const MakeAccount = () => {
       contractInvocationData = [
         {
           functionSignature: 'withdraw(address,uint256)',
-          args: [
-            '0x7cCc8E1CD3167e2bFe0a6c55d83Ed0537d3bb139',
-            5,
-          ],
+          args: ['0x7cCc8E1CD3167e2bFe0a6c55d83Ed0537d3bb139', 5],
           target: '0x8491D9AfC8cbDEebB9539729c05ce7924620329c',
         },
       ];
@@ -268,14 +260,16 @@ export const MakeAccount = () => {
           </button>
           <br />
           <br />
-          <button
-            className="invoke-button"
-            onClick={handler("supply")}
-            disabled={!latestInvitation}
-          >
-            Deposit To Aave 
-          </button>
-          <button
+          {latestInvitation ? (
+            <button
+              className="invoke-button"
+              onClick={handler('supply')}
+              disabled={!latestInvitation}
+            >
+              Deposit To YMAX
+            </button>
+          ) : null}
+          {/* <button
             className="invoke-button"
             onClick={handler("rewards")}
             disabled={!latestInvitation}
@@ -311,7 +305,7 @@ export const MakeAccount = () => {
             disabled={!latestInvitation}
           >
             Withdraw from Compound 
-          </button>  
+          </button>   */}
         </div>
       </div>
     </div>
