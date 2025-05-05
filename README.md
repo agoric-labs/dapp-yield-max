@@ -10,7 +10,7 @@ yarn build # build items in subdirectories
 Secondly start the environment
 ```bash
 yarn local-env:start # start agoric and axelar chains
-yarn deploy-contracts # deploy contracts on agoric
+yarn deploy:contracts # deploy contracts on agoric
 ```
 
 Next start the UI for use
